@@ -255,7 +255,10 @@ func (b *backend) Subscribe(topicURL string, notifies chan<- pubsubhubbub.Event)
 		return errors.New("Invalid topic")
 	}
 
-	lastPostDate := b.feeds.entriesByFeedName(feedName)[0].Date
+	lastPostDate := time.Now()
+	if len(b.feeds.entriesByFeedName(feedName)) > 0 {
+		lastPostDate = b.feeds.entriesByFeedName(feedName)[0].Date
+	}
 
 	ticker := time.NewTicker(cfg.FeedPollInterval)
 	b.topics[topicURL] = &subscription{ticker, notifies}
