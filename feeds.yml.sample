@@ -1,0 +1,7 @@
+---
+
+alpine: https://alpinelinux.org/atom.xml
+archlinux: https://www.archlinux.org/feeds/news/
+github_status: https://status.github.com/messages.rss
+
+...
