@@ -24,14 +24,14 @@ func subscriptionToKey(topicURL, callbackURL string) []byte {
 func keyToSubscription(k []byte) (topicURL, callbackURL string) {
 	parts := strings.SplitN(string(k), " ", 2)
 	if len(parts) == 2 {
-		topicURL, callbackURL = parts[0], parts[1]
+		return parts[0], parts[1]
 	}
-	return
+	return "", ""
 }
 
 func newSubscriptionDB(p *pubsubhubbub.Publisher, db *bolt.DB) error {
 	// Restore old subscriptions
-	err := db.Update(func(tx *bolt.Tx) error {
+	if err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(subscriptionsBucket)
 		if b == nil {
 			return nil
@@ -50,14 +50,19 @@ func newSubscriptionDB(p *pubsubhubbub.Publisher, db *bolt.DB) error {
 
 			return p.Register(topicURL, callbackURL, s.Secret, s.LeaseEnd)
 		})
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
 	// Save new subscriptions
 	p.SubscriptionState = func(topicURL, callbackURL, secret string, leaseEnd time.Time) {
-		err := db.Update(func(tx *bolt.Tx) error {
+		le := log.WithFields(log.Fields{
+			"topic":     topicURL,
+			"callback":  callbackURL,
+			"lease_end": leaseEnd,
+		})
+
+		if err := db.Update(func(tx *bolt.Tx) error {
 			b, err := tx.CreateBucketIfNotExists(subscriptionsBucket)
 			if err != nil {
 				return err
@@ -81,10 +86,12 @@ func newSubscriptionDB(p *pubsubhubbub.Publisher, db *bolt.DB) error {
 			}
 
 			return nil
-		})
-		if err != nil {
-			log.WithError(err).Error("Unable to save subscription")
+		}); err != nil {
+			le.WithError(err).Error("Unable to save subscription")
+			return
 		}
+
+		le.Debug("Added new subscription")
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 
 	"github.com/SlyMarbo/rss"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type feedDBEntry struct {
@@ -16,8 +17,7 @@ type feedDBEntry struct {
 }
 
 type feedDB struct {
-	feeds       map[string]feedDBEntry
-	initialized bool
+	feeds map[string]feedDBEntry
 
 	lock sync.RWMutex
 }
@@ -27,13 +27,15 @@ func newFeedDB(feedConfig map[string]string) *feedDB {
 		feeds: make(map[string]feedDBEntry),
 	}
 
-	for shortName, url := range feedConfig {
-		f.feeds[shortName] = feedDBEntry{
+	for feedName, url := range feedConfig {
+		f.feeds[feedName] = feedDBEntry{
 			URL: url,
 		}
 
 		// Initialize database at startup
-		f.Update(shortName)
+		if _, err := f.Update(feedName); err != nil {
+			log.WithField("feed_name", feedName).WithError(err).Error("Unable to refresh feed")
+		}
 	}
 
 	return f
@@ -65,7 +67,7 @@ func (f *feedDB) Update(feedName string) (bool, error) {
 		return false, errors.Wrap(err, "Unable to retrieve feed")
 	}
 
-	// Reverse sort: swapped i, j
+	// Reverse sort (newest to oldest): swapped i, j
 	sort.Slice(feed.Items, func(j, i int) bool { return feed.Items[i].Date.Before(feed.Items[j].Date) })
 
 	fe.Items = feed.Items
