@@ -20,7 +20,7 @@ import (
 var (
 	cfg = struct {
 		AvatarURL        string        `flag:"avatar-url" default:"https://www.clker.com/cliparts/n/K/7/e/Q/M/rss-feed-md.png" description:"Image to use as avatar"`
-		BaseURL          string        `flag:"base-url" default:"htto://localhost:3000" description:"Base URL of this instance"`
+		BaseURL          string        `flag:"base-url" default:"http://localhost:3000" description:"Base URL of this instance"`
 		DatabasePath     string        `flag:"database-path" default:"./storage.db" description:"Path to store the database in"`
 		FeedDefinitions  string        `flag:"feed-definitions" default:"./feeds.yml" description:"File with shortname to url associations"`
 		FeedPollInterval time.Duration `flag:"feed-poll-interval,i" default:"1m" description:"How often to poll feeds for new entries"`
