@@ -9,6 +9,8 @@ RUN set -ex \
 
 FROM alpine:latest
 
+ENV DATABASE_PATH=/data/storage.db
+
 LABEL maintainer "Knut Ahlers <knut@ahlers.me>"
 
 RUN set -ex \
