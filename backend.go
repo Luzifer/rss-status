@@ -171,11 +171,13 @@ func (b backend) getFeedKey(feedName string) (crypto.PublicKey, error) {
 func (b backend) getFeedLastUpdate(feedName string) (time.Time, error) {
 	t := time.Now() // Fallback: Assume last update was now
 
-	err := b.db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(dateBucket)
-		if err != nil {
-			return err
+	err := b.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(dateBucket)
+		if b == nil {
+			return nil // The bucket is not yet there, just use current time
 		}
+
+		var err error
 
 		k := []byte(feedName)
 		v := b.Get(k)
