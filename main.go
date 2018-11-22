@@ -87,5 +87,7 @@ func main() {
 		log.WithError(err).Fatal("Unable to restore subscription db")
 	}
 
+	log.WithField("version", version).Info("rss-status operative")
+
 	log.WithError(http.ListenAndServe(cfg.Listen, nil)).Fatal("HTTP-Server quit unexpectedly")
 }

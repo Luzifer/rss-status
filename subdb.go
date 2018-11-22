@@ -48,6 +48,11 @@ func newSubscriptionDB(p *pubsubhubbub.Publisher, db *bolt.DB) error {
 				return b.Delete(k)
 			}
 
+			log.WithFields(log.Fields{
+				"topic":     topicURL,
+				"callback":  callbackURL,
+				"lease_end": s.LeaseEnd,
+			}).Debug("Re-registering subscription")
 			return p.Register(topicURL, callbackURL, s.Secret, s.LeaseEnd)
 		})
 	}); err != nil {
