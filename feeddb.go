@@ -10,10 +10,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type feedInfo struct {
+	DisplayName string `yaml:"display_name"`
+	ProfileURL  string `yaml:"profile_url"`
+	FeedURL     string `yaml:"feed_url"`
+}
+
 type feedDBEntry struct {
 	Items       []*rss.Item
 	LastUpdated time.Time
-	URL         string
+	Info        feedInfo
 }
 
 type feedDB struct {
@@ -22,14 +28,14 @@ type feedDB struct {
 	lock sync.RWMutex
 }
 
-func newFeedDB(feedConfig map[string]string) *feedDB {
+func newFeedDB(feedConfig map[string]feedInfo) *feedDB {
 	f := &feedDB{
 		feeds: make(map[string]feedDBEntry),
 	}
 
-	for feedName, url := range feedConfig {
+	for feedName, info := range feedConfig {
 		f.feeds[feedName] = feedDBEntry{
-			URL: url,
+			Info: info,
 		}
 
 		// Initialize database at startup
@@ -52,6 +58,17 @@ func (f *feedDB) entriesByFeedName(name string) []*rss.Item {
 	return nil
 }
 
+func (f *feedDB) infoByFeedName(name string) *feedInfo {
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
+	if e, ok := f.feeds[name]; ok {
+		return &e.Info
+	}
+
+	return nil
+}
+
 func (f *feedDB) Update(feedName string) (bool, error) {
 	f.lock.RLock()
 	fe := f.feeds[feedName]
@@ -62,7 +79,7 @@ func (f *feedDB) Update(feedName string) (bool, error) {
 		return false, nil
 	}
 
-	feed, err := rss.Fetch(fe.URL)
+	feed, err := rss.Fetch(fe.Info.FeedURL)
 	if err != nil {
 		return false, errors.Wrap(err, "Unable to retrieve feed")
 	}

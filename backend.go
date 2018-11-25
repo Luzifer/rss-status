@@ -103,6 +103,8 @@ func (b backend) getFeedEnvelope(feedName string) *activitystream.Feed {
 		lastUpdate = items[0].Date
 	}
 
+	fi := b.feeds.infoByFeedName(feedName)
+
 	return &activitystream.Feed{
 		ID:       feedURL,
 		Title:    feedName,
@@ -110,7 +112,7 @@ func (b backend) getFeedEnvelope(feedName string) *activitystream.Feed {
 		Subtitle: fmt.Sprintf("rss-status feed fetcher for %q feed", feedName),
 		Updated:  activitystream.NewTime(lastUpdate),
 		Link: []activitystream.Link{
-			{Rel: "alternate", Type: "text/html", Href: feedURL},
+			{Rel: "alternate", Type: "text/html", Href: fi.ProfileURL},
 			{Rel: "self", Type: "application/atom+xml", Href: feedURL},
 			{Rel: pubsubhubbub.RelHub, Href: b.baseURL + ostatus.HubPath},
 			{Rel: salmon.Rel, Href: b.baseURL + ostatus.SalmonPath},
@@ -123,11 +125,11 @@ func (b backend) getFeedEnvelope(feedName string) *activitystream.Feed {
 			Summary:    fmt.Sprintf("rss-status feed fetcher for %q feed", feedName),
 			ObjectType: activitystream.ObjectPerson,
 			Link: []activitystream.Link{
-				{Rel: "alternate", Type: "text/html", Href: fmt.Sprintf("%s/@%s.atom", b.baseURL, feedName)},
+				{Rel: "alternate", Type: "text/html", Href: fi.ProfileURL},
 				{Rel: "avatar", Href: cfg.AvatarURL},
 			},
 			PreferredUsername: feedName,
-			DisplayName:       feedName,
+			DisplayName:       fi.DisplayName,
 			Note:              fmt.Sprintf("rss-status feed fetcher for %q feed", feedName),
 		},
 	}

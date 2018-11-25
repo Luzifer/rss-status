@@ -1,7 +1,16 @@
 ---
 
-alpine: https://alpinelinux.org/atom.xml
-archlinux: https://www.archlinux.org/feeds/news/
-github_status: https://status.github.com/messages.rss
+alpine:
+  display_name: Alpine Linux News
+  feed_url: https://alpinelinux.org/atom.xml
+  profile_url: https://alpinelinux.org/
+archlinux:
+  display_name: Arch Linux: Recent news updates
+  feed_url: https://www.archlinux.org/feeds/news/
+  profile_url: https://www.archlinux.org/
+github_status:
+  display_name: GitHub Service Status
+  feed_url: https://status.github.com/messages.rss
+  profile_url: https://status.github.com/messages
 
 ...

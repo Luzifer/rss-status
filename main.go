@@ -50,14 +50,14 @@ func init() {
 	}
 }
 
-func loadFeedDefinitions() (map[string]string, error) {
+func loadFeedDefinitions() (map[string]feedInfo, error) {
 	f, err := os.Open(cfg.FeedDefinitions)
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to open feed definition file")
 	}
 	defer f.Close()
 
-	r := make(map[string]string)
+	r := make(map[string]feedInfo)
 	return r, errors.Wrap(yaml.NewDecoder(f).Decode(&r), "Unable to parse feed definition file")
 }
 
